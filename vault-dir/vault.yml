@@ -1,0 +1,243 @@
+---
+- name: Install HashiCorp Vault on GCP instance
+  hosts: service_vault
+  become: yes
+  
+  tasks:
+    - name: Install prerequisites
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - zip
+        - unzip
+
+    # Ansible Role for Vault setup
+    - name: Create Vault group
+      ansible.builtin.group:
+        name: "{{ vault_group }}"
+        system: yes
+
+    - name: Create Vault user
+      ansible.builtin.user:
+        name: "{{ vault_user }}"
+        create_home: no
+        system: yes
+        shell: "{{ vault_user_shell }}"
+        group: "{{ vault_group }}"
+
+    # Not necessary step, we can instantly install in /tmp dir
+    - name: Create Vault download directory
+      ansible.builtin.file:
+        path: "{{ vault_download_path }}"
+        state: directory
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        mode: "0755"
+
+    # Download Vault binary to previously created dir in /tmp
+    - name: Download Vault binary
+      ansible.builtin.unarchive:
+        src: "https://releases.hashicorp.com/vault/1.15.4/vault_1.15.4_linux_amd64.zip"
+        dest: "{{ vault_download_path }}"
+        creates: "{{ vault_download_path }}/vault"
+        owner: root
+        group: root
+        mode: "0644"
+        remote_src: yes
+
+    - name: Create directories
+      ansible.builtin.file:
+        path: "{{ item.name }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+      loop: "{{ vault_directories }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Create data directory
+      ansible.builtin.file:
+        path: "{{ item.name }}"
+        state: directory
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+      loop: "{{ vault_data_directories }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Generate TLS key and certificate
+      ansible.builtin.command:
+        cmd: openssl req -out tls.crt -new -keyout tls.key -newkey rsa:4096 -nodes -sha256 -x509 -subj "/O=HashiCorp/CN=Vault" -days 1095
+        chdir: /opt/vault/tls
+        creates: /opt/vault/tls/tls.key
+      notify:
+        - Restart vault
+
+    - name: Set ownership of tls material
+      ansible.builtin.file:
+        path: "{{ item.name }}"
+        owner: "{{ item.owner }}"
+        group: "{{ item.group }}"
+        mode: "{{ item.mode }}"
+      loop: "{{ vault_tls_files }}"
+      loop_control:
+        label: "{{ item.name }}"
+
+    - name: Copy Vault binary
+      ansible.builtin.copy:
+        src: "{{ vault_download_path }}/vault"
+        dest: "/usr/bin/vault"
+        owner: root
+        group: root
+        mode: "0755"
+        remote_src: yes
+      notify:
+        - Restart vault
+
+    - name: Set vault cap_ipc_lock capabilities
+      community.general.capabilities:
+        path: "/usr/bin/vault"
+        capability: cap_ipc_lock+ep
+      changed_when: no
+
+    - name: Touch vault.env
+      ansible.builtin.file:
+        path: "/etc/vault.d/vault.env"
+        owner: "{{ vault_user }}"
+        group: "{{ vault_group }}"
+        mode: "0644"
+        state: touch
+        modification_time: preserve
+        access_time: preserve
+      notify:
+        - Restart vault
+
+    # Setup systemd init file to manage Vault daemon
+    - name: Create /usr/lib/systemd/system
+      ansible.builtin.file:
+        path: /usr/lib/systemd/system
+        state: directory
+        owner: root
+        group: root
+        mode: "0755"
+
+    - name: Copy Vault service file
+      ansible.builtin.template:
+        src: vault.service.j2
+        dest: "/usr/lib/systemd/system/vault.service"
+        owner: root
+        group: root
+        mode: "0644"
+      notify:
+        - Daemon reload
+      when:
+        - ansible_service_mgr == "systemd"
+
+    - name: Copy vault configuration
+      ansible.builtin.copy:
+        src: vault.hcl
+        dest: "/etc/vault.d/vault.hcl"
+        owner: root
+        group: root
+        mode: "0644"
+        force: no
+      notify:
+        - Restart vault
+
+    - name: Flush handlers
+      ansible.builtin.meta: flush_handlers
+
+    - name: Start and enable vault
+      ansible.builtin.service:
+        name: vault
+        state: started
+        enabled: yes
+
+    # Vault started in an uninitialised state. We should provide unseal keys and root key
+
+    # We need to set environment variable: VAULT_ADDR: "http://127.0.0.1:8200" 
+    #Error writing data to secret/content: Put "https://127.0.0.1:8200/v1/secret/content": tls: failed to verify certificate: x509: cannot validate certificate for 127.0.0.1 because it doesn't contain any IP SANs
+    # We should place this env var inside vault.hcl, but for now we'll run it from playbook
+
+    # We will have vault init wih unseal keys
+
+    # Create unseal dirs
+    # - name: Create unseal directories
+    #   file:
+    #     path: "{{ unseal_keys_dir_output }}"
+    #     state: directory
+    #   delegate_to: localhost
+
+    # - name: Create root key directories
+    #   file:
+    #     path: "{{ root_token_dir_output }}"
+    #     state: directory
+    #   delegate_to: localhost
+
+    # # vault operation init
+    # - name: Initialise Vault operator
+    #   shell: vault operator init -key-shares=5 -key-threshold=3 -format json
+    #   environment:
+    #     VAULT_ADDR: "http://127.0.0.1:8200"
+    #   register: vault_init_results
+
+    # - name: Parse output of vault init
+    #   set_fact:
+    #     vault_init_parsed: "{{ vault_init_results.stdout | from_json }}"
+
+    # # Register unseal keys
+    # - name: Write unseal keys to files
+    #   copy:
+    #     dest: "{{ unseal_keys_dir_output }}/unseal_key_{{ item.0 }}"
+    #     content: "{{ item.1 }}"
+    #   with_indexed_items: "{{ vault_init_parsed.unseal_keys_hex }}"
+    #   delegate_to: localhost
+
+    # - name: Write root token to file
+    #   copy:
+    #     content: "{{ vault_init_parsed.root_token }}"
+    #     dest: "{{root_token_dir_output}}/rootkey"
+    #   delegate_to: localhost
+
+    # - name: Reading unseal key contents
+    #   command: cat {{item}}
+    #   register: unseal_keys
+    #   with_fileglob: "{{ unseal_keys_dir_output }}/*"
+    #   delegate_to: localhost
+    #   become: no
+
+    # - name: Unseal vault with unseal keys
+    #   shell: |
+    #     vault operator unseal {{ item.stdout }}
+    #   environment:
+    #     VAULT_ADDR: "http://127.0.0.1:8200"
+    #   with_items: "{{unseal_keys.results}}"
+
+    # We're going to divide two separate ansible roles vault-init and vault-unseal
+    # - name: Reading unseal key contents
+    #   command: cat {{item}}
+    #   register: unseal_keys
+    #   with_fileglob: "{{ unseal_keys_dir_output }}/*"
+    #   delegate_to: localhost
+    #   become: no
+      
+    # - name: Unseal vault with unseal keys
+    #   shell: |
+    #     vault operator unseal {{ item.stdout }}
+    #   environment:
+    #     VAULT_ADDR: "http://127.0.0.1:8200"
+    #   with_items: "{{unseal_keys.results}}"
+  
+  # # move handlers to handlers dir
+  # handlers:
+  #   - name: Daemon reload
+  #     ansible.builtin.systemd:
+  #       daemon_reload: true
+
+  #   - name: Restart vault
+  #     ansible.builtin.service:
+  #       name: vault
+  #       state: restarted
