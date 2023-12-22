@@ -1,0 +1,6 @@
+- name: Vault server
+  hosts: service_vault
+  become: yes
+  roles:
+    - role: ansible-vault
+      vault_backend: file
