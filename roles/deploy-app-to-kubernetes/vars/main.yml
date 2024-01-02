@@ -33,7 +33,7 @@ schedule_app_both_overwrite_values:
 schedule_app_backend_overwrite_values:
   - value: 'image.name={{ schedule_app_backend_image_name }}'
   - value: 'image.tag={{ schedule_app_backend_image_tag }}'
-  - value: envType=stage
+  - value: 'envType={{ app_env }}'
   - value: 'secretStore.vaultProvider.server={{ hashicorp_vault_server | quote }}'
   - value: 'secretStore.vaultProvider.auth.roleId={{ hashicorp_vault_approle_application_role_id }}'
   - value: 'secretStore.vaultProvider.auth.secret.secretId={{ hashicorp_vault_approle_application_secret_id }}'

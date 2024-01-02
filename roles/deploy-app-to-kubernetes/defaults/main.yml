@@ -1,7 +1,4 @@
 ---
-# Global
-app_env: dev
-
 # Kuberntenes config context
 k8s_kubeconfig_path: "$HOME/.kube/config"
 
