@@ -1,38 +1,73 @@
 Role Name
 =========
 
-A brief description of the role goes here.
+This role is patching the vault secrets in kubernetes with new secre-id.
 
 Requirements
 ------------
 
-Any pre-requisites that may not be covered by Ansible itself or the role should be mentioned here. For instance, if the role uses the EC2 module, it may be a good idea to mention in this section that the boto package is required.
+This role requires the fully configured kubernetes cluster with the deployed application.
 
 Role Variables
 --------------
 
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
+The role defines variables in `defaults/main.yml`:
+
+### `k8s_kubeconfig_path`
+
+- Path to the Kubernetes config file.
+- Default value: `"PATH_TO_KUBECONFIG"`
+
+### `hashicorp_vault_server`
+
+- Address of the HashiCorp Vault server.
+- Default value: `"YOUR_HASHICORP_VAULT_SERVER_ADDRESS"`
+
+### `hashicorp_vault_ansible_username`
+
+- Username for Ansible to access HashiCorp Vault.
+- Default value: `"YOUR_ANSIBLE_USERNAME"`
+
+### `hashicorp_vault_ansible_password`
+
+- Password for Ansible to access HashiCorp Vault.
+- Default value: `"YOUR_ANSIBLE_PASSWORD"`
+
+### `schedule_app_namespace`
+
+- Namespace for your application.
+- Default value: `"YOUR_APPLICATION_NAMESPACE"`
+
+### `schedule_app_hashicorp_approle_secret_name`
+
+- Name of the Kubernetes secret storing HashiCorp Vault AppRole credentials for your application.
+- Default value: `"YOUR_K8S_APPROLE_SECRET_NAME"`
+
+### `hashicorp_vault_approle_application_secret_id_path`
+
+- Path to the secret ID of the application's AppRole in HashiCorp Vault.
+- Default value: `"YOUR_APPROLE_SECRET_PATH"`
 
 Dependencies
 ------------
 
-A list of other roles hosted on Galaxy should go here, plus any details in regards to parameters that may need to be set for other roles, or variables that are used from other roles.
+
+This role relies on the `community.hashi_vault`, `kubernetes.core` collections. 
 
 Example Playbook
 ----------------
 
-Including an example of how to use your role (for instance, with variables passed in as parameters) is always nice for users too:
-
-    - hosts: servers
-      roles:
-         - { role: username.rolename, x: 42 }
+```ansible
+- name: Patch the kubernetes vault secret
+  hosts: localhost
+  roles:
+    - { 
+        role: patch-app-vault-secret,
+        k8s_kubeconfig_path: "~/.kube/config" 
+    }
+```
 
 License
 -------
 
 BSD
-
-Author Information
-------------------
-
-An optional section for the role authors to include contact information, or a website (HTML is not allowed).
