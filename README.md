@@ -1,15 +1,19 @@
 # Ansible Repository for Class Schedule Project
 
-This repository contains Ansible playbooks, roles, and configurations to manage and deploy various services for the [Class Schedule project](https://github.com/BlueTeam2/ClassSchedule).
+This repository contains Ansible playbooks, roles, execution-environment and configurations to manage and deploy various services for the [Class Schedule project](https://github.com/BlueTeam2/ClassSchedule).
 
 ## Repository Structure:
 
 - **files:** Contains an initial database dump used to restore the database on the staging env.
-- **group_vars:** Contains the `all.yml` file with key variables for different services and configurations. Also includes `service_*.yml`, storing specific service variables.
-- **`install_docker` role:** Installs Docker on Ubuntu machines.
+- **group_vars:** The `all.yml` file includes key variables for various services and configurations, serving as a comprehensive configuration file. Additionally, it encompasses individual `service_*.yml` files, each storing specific service variables tailored for our virtual machines (VMs).
+- **host_vars:** The `localhost.yml` file, containing essential variables like gcp_cluster_name, gcp_cluster_zone, az_kubeconfig_path, etc., must be provided for Kubernetes to deploy our application to both the GCP and Azure Kubernetes clusters.
+- **cluster-peering role:** Establish a peering connection between different clusters in GCP and Azure using the Mesh Gateways of each cluster.
+- **deploy-app-to-kubernetes role:** Deploy our application to Kubernetes Cluster infrastructure.
+- **patch-app-vault-secret role:** Updates Kubernetes secrets with data retrieved from Vault.
 - **templates:** Holds Jinja2 templates for application configurations.
-- **dynamic inventories:** Includes `production_gcp.yml` and `staging_gcp.yml` for production and stage envs respectively.
-- **playbooks:** Docker, Postgres, Tomcat, Grafana, MongoDB, Redis, Node Exporter, and a main playbook orchestrating all.
+- **dynamic inventories:** Includes `inventory_dev.yml`, `inventory_stage.yml`, `inventory_prod.yml` and `inventory_global.yml` for development, stage, production and global envs respectively.
+- **playbooks:** Cluster Peering, Kubernetes AKS, Kubernetes GCP, Mongo, Nexus, Postgres, Vault, Patch App Secret for AKS/GCP and Patch for Vault secrets. These all playbooks orchestrate `main.yml` playbook.
+- **execution-environment:** allows us to deploy all necessary collections, modules, packages and roles for **_Ansible_**
 
 ## Usage:
 
