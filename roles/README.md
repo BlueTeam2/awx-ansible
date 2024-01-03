@@ -1,3 +1,3 @@
-## Run the following command to install ansible-community.ansible-vault role:
+## Run the following command to install all the required roles role:
     
     ansible-galaxy role install -r requirements.yml
