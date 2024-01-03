@@ -1,0 +1,21 @@
+plugin: google.cloud.gcp_compute
+projects:
+  - softseve-blue-team
+filters:
+  - status = RUNNING
+  - labels.app = "schedule"
+  - labels.env = "prod"
+auth_kind: serviceaccount
+keyed_groups:
+  - key: labels.service
+    prefix: service
+  - key: labels.env
+    prefix: env
+hostnames:
+  - name
+  - public_ip
+  - private_ip
+compose:
+  ansible_host: networkInterfaces[0].accessConfigs[0].natIP
+  public_ip: networkInterfaces[0].accessConfigs[0].natIP
+  private_ip: networkInterfaces[0].networkIP
