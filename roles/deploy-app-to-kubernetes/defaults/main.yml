@@ -1,7 +1,4 @@
 ---
-# Global
-envirnoment: dev
-
 # Kuberntenes config context
 k8s_kubeconfig_path: "$HOME/.kube/config"
 
@@ -28,8 +25,8 @@ hashicorp_vault_server: "YOUR_HASHICORP_VAULT_SERVER"
 hashicorp_vault_ansible_username: "YOUR_ANSIBLE_USERNAME"
 hashicorp_vault_ansible_password: "YOUR_ANSIBLE_PASSWORD"
 
-hashicorp_vault_approle_application_role_id_path: "auth/approle/role/app_{{ envirnoment }}/role-id"
-hashicorp_vault_approle_application_secret_id_path: "auth/approle/role/app_{{ envirnoment }}/secret-id"
+hashicorp_vault_approle_application_role_id_path: "auth/approle/role/app_{{ app_env }}/role-id"
+hashicorp_vault_approle_application_secret_id_path: "auth/approle/role/app_{{ app_env }}/secret-id"
 
 # Consul
 consul_dc_name: dc1

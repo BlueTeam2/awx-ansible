@@ -6,7 +6,7 @@ mongo_thp: false
 mongo_numa: false
 
 mongo_backup:
-  enabled: false
+  enabled: true
   dbs:
     - admin
     - config

@@ -16,7 +16,7 @@
             sql_instances.resources |
             selectattr('settings.userLabels.app', 'defined') |
             selectattr('settings.userLabels.app', 'equalto', 'schedule') |
-            selectattr('settings.userLabels.env', 'equalto', envirnoment)
+            selectattr('settings.userLabels.env', 'equalto', app_env)
           }}
         
     - name: Extract instace ip and name
@@ -53,6 +53,7 @@
       ansible.builtin.set_fact:
         postgres_admin_user: "{{ postgres_credentials.secret.admin_username }}"
         postgres_admin_password: "{{ postgres_credentials.secret.admin_password }}"
+      no_log: true # Ensure not to log credentials
 
     - name: Create admin user
       google.cloud.gcp_sql_user:
@@ -76,7 +77,7 @@
         owner: "{{ postgres_admin_user }}"
         state: present
         
-    - name: Restore dump for stage and dev envirnoment
+    - name: Restore dump for stage and dev env
       community.postgresql.postgresql_db:        
         login_host: "{{ postgres_host  }}"
         login_user: "{{ postgres_admin_user  }}"
@@ -84,4 +85,4 @@
         name: "{{ postgres_schedule_database_name }}"
         state: restore
         target: "{{ postgres_initial_data_dest }}"
-      when: envirnoment == "dev" or envirnoment == "stage"
+      when: app_env == "dev" or app_env == "stage"

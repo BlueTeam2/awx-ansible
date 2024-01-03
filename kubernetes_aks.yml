@@ -18,7 +18,7 @@
     - name: Create kubeconfig file for the cluster
       copy:
         content: "{{ aks_cluster_kubeconfig }}"
-        dest: "{{ az_kubeconfig_path }}"  # Specify the destination path and file name
+        dest: "{{ az_kubeconfig_path }}"
         mode: "{{ az_kubeconfig_mode }}"
 
   roles:

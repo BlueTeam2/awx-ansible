@@ -8,20 +8,18 @@ gcp_project_env: GCP_PROJECT
 gcp_kubeconfig_env: KUBECONFIG
 gcp_kubeconfig_path: "{{ k8s_kubeconfig_base_path }}/gcp_config"
 gcp_conul_dc_name: gcp
-
-
-cluster_name: stage-schedule
-cluster_zone: us-central1-b
+gcp_cluster_name: "{{ app_env }}-schedule"
+gcp_cluster_zone: us-central1-b
 
 # Azure configuraion
 az_kubeconfig_path: "{{ k8s_kubeconfig_base_path }}/az_config"
 az_kubeconfig_mode: "0644"
 az_extract_kubeconfig_type: "admin"
 az_auth_source: "env"
-aks_cluster_rg: stage-schedule
+aks_cluster_rg: "{{ app_env }}-schedule"
 aks_conul_dc_name: aks
 az_cluster_tags:
-  - "env:{{ envirnoment }}"
+  - "env:{{ app_env }}"
   - "app:schedule"
 
 
@@ -30,13 +28,9 @@ schedule_app_namespace: schedule-app
 
 # Patch vault secret to renew token
 schedule_app_hashicorp_approle_secret_name: hashicorp-vault-approle-token
-schedule_app_secret_patch_definition:
-  data:
-    secret-id: "{{ hashicorp_vault_approle_application_secret_id | b64encode }}"
 
 # Postgres configuration
 postgres_port: 5432
 postgres_schedule_database_name: schedule
-postgres_restore_dump: true
 postgres_initial_data_dest: "./files/initial_data.sql"
 postgre_admin_roles: "CREATEDB"

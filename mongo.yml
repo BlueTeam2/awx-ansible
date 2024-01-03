@@ -21,6 +21,7 @@
         mongo_adminuser_pass:  "{{ mongo_credentials.secret.admin_user_password }}"
         mongo_admin_pass:      "{{ mongo_credentials.secret.admin_passowrd }}"
         mongo_backup:          "{{ mongo_backup | combine({'pass':mongo_credentials.secret.backup_password}) }}"
+      no_log: true # Ensure not to log credentials
 
   roles:
     - { role: ansible-mongodb-ubuntu }

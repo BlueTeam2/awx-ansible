@@ -1,8 +1,3 @@
-
-# Move to playbook vars @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-certbot_email: havrylets.bohdan.softs@gmail.com
-vault_public_hostname: global-vault.smaha.top
-
 # Nginx configuration
 nginx_vhosts:
   - listen: "443 ssl"
@@ -47,18 +42,6 @@ vault_start_pause_seconds: 60
 vault_listener_localhost_enable: true
 vault_localhost_address: 127.0.0.1
 vault_localhost_port: 8200
-# vault_tls_disable: false
-# vault_tls_copy_keys: true
-# vault_tls_files_remote_src: true
-# vault_tls_disable_client_certs: true
-# vault_tls_src_files: "/etc/letsencrypt/live/{{ vault_public_hostname }}"
-# # vault_address: "{{ hostvars[inventory_hostname]['public_ip'] }}" # We can use `public_ip` because we define it in invetory file 
-# # vault_api_addr: "{{ vault_protocol }}://{{ vault_redirect_address | default(hostvars[inventory_hostname]['public_ip']) }}:{{ vault_port }}"
-# # vault_tls_private_path: "/etc/letsencrypt/live/{{ vault_public_hostname }}"
-
-# vault_tls_cert_file: "cert.pem"
-# vault_tls_key_file: "privkey.pem"
-# vault_tls_ca_file: "chain.pem"
 
 certbot_auto_renew: false
 certbot_auto_renew_user: "root"

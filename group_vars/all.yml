@@ -4,7 +4,7 @@ ansible_ssh_user: sa_101994008222971342723
 ansible_ssh_private_key_file: "YOUR_ANSINBLE_PRIVATE_KEY"
 
 # Global
-envirnoment: stage # dev/stage/prod
+app_env: stage # dev/stage/prod
 
 
 # Hashicorp vault
@@ -14,8 +14,8 @@ hashicorp_vault_server: "YOUR_HASHICORP_VAULT_SERVER_ADDRESS"
 hashicorp_vault_ansible_username: "YOUR_ANSIBLE_USERNAME"
 hashicorp_vault_ansible_password: "YOUR_ANSIBLE_PASSWORD"
 
-hashicorp_vault_approle_application_role_id_path: "auth/approle/role/app_{{ envirnoment }}/role-id"
-hashicorp_vault_approle_application_secret_id_path: "auth/approle/role/app_{{ envirnoment }}/secret-id"
+hashicorp_vault_approle_application_role_id_path: "auth/approle/role/app_{{ app_env }}/role-id"
+hashicorp_vault_approle_application_secret_id_path: "auth/approle/role/app_{{ app_env }}/secret-id"
 
 ## Mount points
 hashicorp_vault_application_mount_point: class_schedule
@@ -24,8 +24,8 @@ hashicorp_vault_nexus_mount_point: artifact_repository
 hashicorp_vault_certbot_mount_point: certbot
 
 ## Secrets paths
-hashicorp_vault_postgres_path: "{{ envirnoment }}/postgresql"
-hashicorp_vault_mongodb_path: "{{ envirnoment }}/mongodb"
+hashicorp_vault_postgres_path: "{{ app_env }}/postgresql"
+hashicorp_vault_mongodb_path: "{{ app_env }}/mongodb"
 hashicorp_vault_datadog_path: datadog
 hashicorp_vault_nexus_path: nexus
 hashicorp_vault_certbot_path: config

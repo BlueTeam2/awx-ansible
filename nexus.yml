@@ -24,6 +24,7 @@
         nexus_jenkins_password:    "{{ nexus_credentials.secret.jenkins_password }}"
         nexus_kubernetes_user:     "{{ nexus_credentials.secret.kubernetes_username }}"
         nexus_kubernetes_password: "{{ nexus_credentials.secret.kubernetes_password }}"
+      no_log: true # Ensure not to log credentials
 
     
     - name: Retrive required for certbot secrets from vault
@@ -42,6 +43,7 @@
     - name: Extract nexus facts
       ansible.builtin.set_fact:
         certbot_email: "{{ certbot_credentials.secret.email }}"
+      no_log: true # Ensure not to log credentials
 
   roles:
     - { role: geerlingguy.certbot }
