@@ -38,3 +38,52 @@ This repository contains Ansible playbooks, roles, execution-environment and con
 - Role `cluster-peering` designed for peering our Clusters in differents clouds (Azure/GCP).
 - Role `deploy-app-to-kubernetes` deploy whole application on our infrastructure.
 - Role `patch-app-vault-secret` Updates Kubernetes secrets with data retrieved from Vault.
+
+## Secrets Structure
+
+<details>
+   <summary>artifact_repository</summary>
+
+   - nexus
+      - admin_password
+      - jenkins_username
+      - jenkins_password
+      - kubernetes_username
+      - kubernetes_password
+      - public_hostname
+</details>
+
+<details>
+   <summary>certbot</summary>
+
+   - config
+      - email
+</details>
+
+<details>
+   <summary>monitoring</summary>
+
+   - datadog
+      - api_key
+</details>
+
+<details>
+   <summary>class_schedule</summary>
+
+   - dev/stage/prod
+      - jwt
+         - token
+         - expired
+      - mongodb
+         - admin_password
+         - admin_user_password
+         - backup_password
+         - db_name
+         - url
+      - postgresql
+         - admin_username
+         - admin_password
+         - db_name
+         - ip
+         - port
+</details>
